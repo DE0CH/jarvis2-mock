@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { View } from "react-native";
-import { useStore, createSession, toast, loadContent } from "../lib/store";
+import { useStore, createSession, toast, loadContent, refresh } from "../lib/store";
 import { pickFiles, pickDocuments, fromFiles, shrink, upload, isPicture, type Picked, type Uploaded } from "../lib/files";
 import { useTheme, radius } from "../theme";
 import { Button, CheckboxCards, Flex, Lbl, Muted, P, Progress, RadioCards, Spinner, TextArea, TextField, Code, type Choice } from "../ui/kit";
@@ -128,7 +128,14 @@ export function NewSession() {
     const body = { environments: pickedEnvs, repos: picked, content: pickedContent, label: label.trim(), permissionMode: perm, size, model, prompt: prompt.trim(), autoPause: !oneShot && autoPause.includes("on"), oneShot, attachments, apiProxy: apiProxy.includes("on") };
     // Jarvis 2: the secret stores, harness and image are chosen in the shell's secure sheet; this form
     // only pre-selects non-sensitive stores and carries the rest along.
-    if (hasShell) { requestSecureNewSession({ requestId: requestId.current, title, harness: MODELS.models?.[model]?.harness || "claude", ...body }); done(); return; }
+    if (hasShell) {
+      // the form stays underneath the shell's page: Back there returns to it as it was
+      requestSecureNewSession({ requestId: requestId.current, title, harness: MODELS.models?.[model]?.harness || "claude", ...body }, (r) => {
+        starting.current = false;
+        if (r.result === "created") { refresh(false); done(); }
+      });
+      return;
+    }
     createSession(requestId.current, title, body);
     done();
   }

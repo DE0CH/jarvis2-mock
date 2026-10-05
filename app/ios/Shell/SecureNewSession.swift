@@ -1,4 +1,4 @@
-// The secure New session sheet. Drawn only by the shell (the React Native UI's view is gone while it is
+// The secure New session page. Drawn only by the shell (the React Native UI's view is gone while it is
 // up). What it shows comes from the core's signed answers; what it signs is checked against what was
 // picked here. Normal mode may pre-select non-sensitive stores; a sensitive store is only ever added by
 // a tap on this sheet.
@@ -20,9 +20,9 @@ struct SecureNewSession: View {
 
   var body: some View {
     VStack(spacing: 0) {
-      // the RN Page top bar: Back (= Cancel) · title · primary action
+      // the app's Page top bar (src/ui/page.tsx): ← Back · title · primary action
       HStack(spacing: 12) {
-        KitButton(title: "Cancel", variant: .soft, color: .gray, disabled: busy != nil, id: "secure-cancel") { shell.exitSecure("cancelled") }
+        KitButton(title: "← Back", variant: .soft, color: .gray, disabled: busy != nil, id: "secure-back") { shell.exitSecure("back") }
         Text("New session").font(.system(size: K.fontSize[4], weight: .bold)).foregroundStyle(Radix.gray.s[12]).lineLimit(1).frame(maxWidth: .infinity, alignment: .leading)
         KitButton(title: busy ?? "Create", disabled: picked.isEmpty || image == nil, busy: busy != nil, id: "secure-create") { Task { await create() } }
       }
@@ -83,7 +83,7 @@ struct SecureNewSession: View {
         .frame(maxWidth: .infinity)
       }
     }
-    .background(Radix.background)
+    .background(Radix.background.ignoresSafeArea())
     .task { await load() }
   }
 
@@ -133,7 +133,7 @@ struct SecureNewSession: View {
       let id = try await Core.shared.respond(challenge: doc, signature: sig, phoneKey: pub, session: session)
       shell.log("created \(id)")
       busy = nil
-      shell.exitSecure("created \(id)")
+      shell.exitSecure("created \(id)", created: id)
     } catch {
       busy = nil
       failure = error.localizedDescription

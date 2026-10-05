@@ -77,4 +77,7 @@ final class HostLink: NSObject {
 
 final class ExtensionServiceImpl: NSObject, ExtensionService {
   func hello(_ reply: @escaping (String) -> Void) { reply("extension pid \(getpid())") }
+  func secureFinished(_ result: String) {
+    DispatchQueue.main.async { NotificationCenter.default.post(name: Notification.Name("JarvisShellEvent"), object: nil, userInfo: ["name": "secureFinished", "body": result]) }
+  }
 }

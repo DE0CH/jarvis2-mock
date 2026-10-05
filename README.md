@@ -3,7 +3,7 @@
 A mock of Jarvis 2's iPhone app: a small native **Swift shell** that owns the screen and hosts the whole
 Jarvis React Native UI inside a bundled **ExtensionKit extension** (its own process). Security-relevant
 steps run in the shell's **secure mode**: the extension's view is removed, and the shell shows its own
-native sheet (styled like the app) whose choices are signed with the phone's Secure Enclave key and checked
+native page (styled like the app, pushed with the native motion) whose choices are signed with the phone's Secure Enclave key and checked
 by a mock **secrets-controller core**.
 
 - `app/` — the Jarvis app (Expo / React Native), with a mock login and New session handing off to the shell

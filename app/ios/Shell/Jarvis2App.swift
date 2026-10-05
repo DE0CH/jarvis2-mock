@@ -1,8 +1,9 @@
 // Jarvis 2: a small native shell that owns the window. The whole Jarvis React Native UI runs in the
 // bundled ExtensionKit extension (JarvisUI), in its own process, shown full-screen in normal mode. Anything
 // may ask to ENTER secure mode (XPC requestSecureMode); only this shell's own code leaves it. In secure
-// mode the extension's view is removed — it cannot draw or receive taps — and the shell shows its own
-// sheet over a still snapshot of the app, so the switch looks seamless.
+// mode the extension's view is removed — it cannot draw or receive taps — and the shell pushes its own
+// page over a still snapshot of the app with the native push motion (no sheets: forms are pages), so
+// the switch looks seamless. Back pops it to the right; a finished Create leaves to the left.
 import ExtensionFoundation
 import ExtensionKit
 import SwiftUI
@@ -30,6 +31,9 @@ final class Shell {
   var snapshot: UIImage?
   var coverWithSnapshot = false
   var loadError: String?
+  /// how the secure page leaves: to the trailing edge (Back) or the leading edge (Create — "go ahead")
+  var exitForward = false
+  var extensionProxy: ExtensionService?
   weak var hostVC: EXHostViewController?
   var lines: [String] = []
   private var monitor: AppExtensionPoint.Monitor?
@@ -75,15 +79,26 @@ final class Shell {
     log("enter secure")
     secureOptions = opts
     captureSnapshot()
-    withAnimation(.spring(duration: 0.4)) { mode = .secure }
+    exitForward = false
+    withAnimation(Shell.push) { mode = .secure }
   }
 
-  /// only the shell's own code calls this
-  func exitSecure(_ why: String) {
+  /// only the shell's own code calls this. `created` = the id of a session the core certified.
+  func exitSecure(_ why: String, created: String? = nil) {
     log("exit secure: \(why)")
+    exitForward = created != nil
     coverWithSnapshot = snapshot != nil
-    withAnimation(.spring(duration: 0.4)) { mode = .normal }
+    withAnimation(Shell.push) { mode = .normal }
+    var r: [String: Any] = ["result": created != nil ? "created" : "back"]
+    if let rid = secureOptions["requestId"] as? String { r["requestId"] = rid }
+    if let created { r["id"] = created }
+    let json = (try? JSONSerialization.data(withJSONObject: r)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
+    // the extension's view is back a moment later; tell React Native once it is listening again
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { self.extensionProxy?.secureFinished(json) }
   }
+
+  /// the iOS navigation push/pop curve
+  static let push = Animation.timingCurve(0.2, 0.9, 0.3, 1, duration: 0.45)
 
   func extensionDidActivate() {
     guard coverWithSnapshot else { return }
@@ -119,16 +134,21 @@ struct RootView: View {
           Text(e).font(.footnote).foregroundStyle(Radix.red.a[11]).padding()
         }
       } else {
-        // a still image of the app (shell-owned pixels), dimmed, under the shell's own sheet
-        if let img = shell.snapshot {
-          Image(uiImage: img).resizable().ignoresSafeArea().transition(.identity).accessibilityHidden(true)
+        // a still image of the app (shell-owned pixels) slides back and dims a little, like the page
+        // under a native push; the shell's own page comes in over it
+        GeometryReader { g in
+          if let img = shell.snapshot {
+            Image(uiImage: img).resizable().ignoresSafeArea()
+              .overlay(Color.black.opacity(0.12).ignoresSafeArea())
+              .offset(x: -g.size.width * 0.3)
+              .transition(.asymmetric(insertion: .offset(x: g.size.width * 0.3).combined(with: .identity), removal: .offset(x: g.size.width * 0.3)))
+              .accessibilityHidden(true)
+          }
         }
-        Radix.overlay.ignoresSafeArea().transition(.opacity)
+        .ignoresSafeArea()
         SecureNewSession(shell: shell, options: shell.secureOptions)
-          .clipShape(UnevenRoundedRectangle(topLeadingRadius: K.radius[6], topTrailingRadius: K.radius[6], style: .continuous))
-          .padding(.top, 12)
-          .ignoresSafeArea(edges: .bottom)
-          .transition(.move(edge: .bottom))
+          .shadow(color: .black.opacity(0.12), radius: 12, x: -2, y: 0)
+          .transition(.asymmetric(insertion: .move(edge: .trailing), removal: shell.exitForward ? .move(edge: .leading) : .move(edge: .trailing)))
       }
     }
     .task { await shell.load() }
@@ -163,6 +183,7 @@ struct ExtensionHost: UIViewControllerRepresentable {
         c.remoteObjectInterface = NSXPCInterface(with: ExtensionService.self)
         c.resume()
         connection = c
+        shell.extensionProxy = c.remoteObjectProxyWithErrorHandler { [shell] e in DispatchQueue.main.async { shell.log("xpc error \(e)") } } as? ExtensionService
         // an XPC connection only reaches the other side with its first message
         (c.remoteObjectProxyWithErrorHandler { [shell] e in DispatchQueue.main.async { shell.log("xpc error \(e)") } } as? ExtensionService)?
           .hello { [shell] a in DispatchQueue.main.async { shell.log("xpc: \(a)") } }

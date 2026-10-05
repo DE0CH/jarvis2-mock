@@ -5,11 +5,14 @@
    native sheet decides what reaches the machine: **secret stores, harness, session image**, then **Create**
    (Face ID). The form's choices travel along as options.
 2. **Pre-selection:** normal mode may pre-select non-sensitive stores only; the React Native form doesn't even
-   list sensitive stores. A sensitive store is only added by a tap on the secure sheet, which then shows an
+   list sensitive stores. A sensitive store is only added by a tap on the secure page, which then shows an
    amber "this session will hold sensitive secrets: …" warning.
-3. **The secure sheet looks like a pushed page** (the app's top bar: Cancel · title · Create) on a sheet that
-   slides up over a dimmed, shell-owned snapshot of the app; both exits (Cancel, a finished Create) are the
-   shell's own code. A blue "Secure — drawn by the Jarvis 2 shell" banner marks it.
+3. **The secure screen is a page, not a sheet** (no sheets: forms are pages). It is pushed with the native
+   push motion over a shell-owned snapshot of the React Native form (which slides back and dims a little),
+   with the app's own top bar: ← Back · title · Create. Back pops it to the right onto the form as it was;
+   a finished Create leaves to the left (the app's "go ahead" motion) and the shell tells React Native, which
+   then closes the form. Both exits are the shell's own code. A blue "Secure — drawn by the Jarvis 2 shell"
+   banner marks it.
 4. **Only `new-session` requests** are accepted for secure mode in this mock; any other kind is refused.
 5. **The image** is shown as "Latest CI build · built <date> · verified by the core" — from the core's signed
    store answer (the GitHub build attestation isn't wired yet).

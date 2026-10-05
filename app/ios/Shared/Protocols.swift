@@ -11,4 +11,6 @@ import Foundation
 /// reaches the other side with its first message.
 @objc(ExtensionService) public protocol ExtensionService {
   func hello(_ reply: @escaping (String) -> Void)
+  /// the shell left secure mode: {"requestId": …, "result": "created" | "back", "id": …}
+  func secureFinished(_ result: String)
 }

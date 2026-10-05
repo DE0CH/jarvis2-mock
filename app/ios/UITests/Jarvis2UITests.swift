@@ -40,8 +40,17 @@ final class Jarvis2UITests: XCTestCase {
       gmail.tap(); sleep(1)
       r.append("[\(tag)] sensitive warning: \(el("secure-sensitive-warning").exists)")
       shot("\(tag)-05-sensitive-picked")
-      gmail.tap(); sleep(1) // unpick again: create with the pre-selected default store
     }
+    // Back pops the shell's page and returns to the React Native form as it was
+    el("secure-back").tap()
+    for i in 0..<3 { shot("\(tag)-05b-back-\(i)"); usleep(120_000) }
+    let formAgain = el("ns-start").waitForExistence(timeout: 10)
+    r.append("[\(tag)] Back returned to the form: \(formAgain)")
+    sleep(1)
+    shot("\(tag)-05c-form-again")
+    el("ns-start").tap()
+    _ = el("secure-create").waitForExistence(timeout: 15)
+    sleep(2)
     el("secure-create").tap()
     let back = el("newBtn").waitForExistence(timeout: 40)
     r.append("[\(tag)] back to the list after create: \(back); error shown: \(el("secure-error").exists)")
