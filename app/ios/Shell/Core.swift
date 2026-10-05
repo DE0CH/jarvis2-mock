@@ -126,7 +126,7 @@ final class PhoneKey {
   static let shared = PhoneKey()
   private let tag = "dev.de0ch.jarvis2.phone-signing"
   // The iOS 26 simulator emulates the Enclave, but its Face ID can't be enrolled/matched from CI, so the
-  // simulator build signs with a software key (the secure sheet says so); a real iPhone uses the Enclave.
+  // simulator build signs with a software key (the secure page says so); a real iPhone uses the Enclave.
   var usesEnclave: Bool {
     #if targetEnvironment(simulator)
     return false

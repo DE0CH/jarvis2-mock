@@ -1,5 +1,5 @@
 // The React Native UI kit's look (src/ui/kit.tsx: Radix Themes, radius "large", accent blue, gray slate)
-// rebuilt in SwiftUI for the shell's secure sheets, so moving between the two is seamless.
+// rebuilt in SwiftUI for the shell's secure pages, so moving between the two is seamless.
 import SwiftUI
 
 enum K {

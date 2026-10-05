@@ -2,7 +2,7 @@
 
 1. **New session is split.** The React Native form (normal mode) keeps prompt, title, attachments, permission
    mode, model, size, idle and API options. Its button says **Continue** and enters secure mode. The shell's
-   native sheet decides what reaches the machine: **secret stores, harness, session image**, then **Create**
+   native page decides what reaches the machine: **secret stores, harness, session image**, then **Create**
    (Face ID). The form's choices travel along as options.
 2. **Pre-selection:** normal mode may pre-select non-sensitive stores only; the React Native form doesn't even
    list sensitive stores. A sensitive store is only added by a tap on the secure page, which then shows an

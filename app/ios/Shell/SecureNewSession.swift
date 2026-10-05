@@ -1,7 +1,7 @@
 // The secure New session page. Drawn only by the shell (the React Native UI's view is gone while it is
 // up). What it shows comes from the core's signed answers; what it signs is checked against what was
 // picked here. Normal mode may pre-select non-sensitive stores; a sensitive store is only ever added by
-// a tap on this sheet.
+// a tap on this page.
 import SwiftUI
 
 struct SecureNewSession: View {

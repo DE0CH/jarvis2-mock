@@ -45,8 +45,8 @@ final class Shell {
     lines.append(line)
   }
 
-  /// the core's signed store list, fetched at launch so the secure sheet is filled at once (it is
-  /// fetched again, with a fresh nonce, every time the sheet opens)
+  /// the core's signed store list, fetched at launch so the secure page is filled at once (it is
+  /// fetched again, with a fresh nonce, every time the page opens)
   var prefetched: Core.StoresPayload?
 
   func load() async {
@@ -71,7 +71,7 @@ final class Shell {
     snapshot = UIGraphicsImageRenderer(bounds: v.bounds).image { _ in _ = v.drawHierarchy(in: v.bounds, afterScreenUpdates: false) }
   }
 
-  /// anyone may ask (the extension, over XPC); the options only pre-fill the shell's sheet
+  /// anyone may ask (the extension, over XPC); the options only pre-fill the shell's page
   func enterSecure(_ optionsJSON: String) {
     guard mode == .normal else { return }
     let opts = (try? JSONSerialization.jsonObject(with: Data(optionsJSON.utf8))) as? [String: Any] ?? [:]
