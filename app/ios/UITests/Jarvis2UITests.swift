@@ -53,13 +53,11 @@ final class Jarvis2UITests: XCTestCase {
     return r
   }
 
+  /// CI sets the simulator's appearance (simctl ui … appearance) and runs this once per appearance;
+  /// JARVIS2_APPEARANCE names the pass in the screenshots
   func testWalkthrough() {
     continueAfterFailure = true
-    var r: [String] = []
-    XCUIDevice.shared.appearance = .light
-    r += walk("light")
-    XCUIDevice.shared.appearance = .dark
-    r += walk("dark")
-    note("00-results", r.joined(separator: "\n"))
+    let tag = ProcessInfo.processInfo.environment["JARVIS2_APPEARANCE"] ?? "run"
+    note("00-results-\(tag)", walk(tag).joined(separator: "\n"))
   }
 }

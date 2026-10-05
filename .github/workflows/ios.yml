@@ -38,18 +38,27 @@ jobs:
           xcrun simctl bootstatus "iPhone 17" -b
           nohup xcrun simctl spawn "iPhone 17" log stream --style compact --level debug \
             --predicate 'process == "JarvisUI" OR process == "Jarvis2"' > out/sim.log 2>&1 &
-      - name: Build + UI test
+      - name: Build for testing
         working-directory: app/ios
         run: |
           set -o pipefail
-          xcodebuild test -workspace Jarvis2.xcworkspace -scheme Jarvis2 \
-            -destination 'platform=iOS Simulator,name=iPhone 17' \
-            -resultBundlePath ../../result.xcresult 2>&1 | tee ../../xcodebuild.log | grep -E "error:|Test Case|\*\* " || true
-          grep -q "TEST SUCCEEDED\|TEST FAILED" ../../xcodebuild.log
+          xcodebuild build-for-testing -workspace Jarvis2.xcworkspace -scheme Jarvis2 \
+            -destination 'platform=iOS Simulator,name=iPhone 17' -derivedDataPath ../../dd 2>&1 | tee ../../xcodebuild.log | grep -E "error:|\*\* " || true
+          grep -q "TEST BUILD SUCCEEDED" ../../xcodebuild.log
+      - name: UI test, light then dark
+        working-directory: app/ios
+        run: |
+          for a in light dark; do
+            xcrun simctl ui "iPhone 17" appearance $a
+            TEST_RUNNER_JARVIS2_APPEARANCE=$a xcodebuild test-without-building -workspace Jarvis2.xcworkspace -scheme Jarvis2 \
+              -destination 'platform=iOS Simulator,name=iPhone 17' -derivedDataPath ../../dd \
+              -resultBundlePath ../../result-$a.xcresult 2>&1 | tee -a ../../xcodebuild.log | grep -E "error:|Test Case|\*\* " || true
+          done
+          grep -q "TEST EXECUTE SUCCEEDED\|TEST EXECUTE FAILED\|TEST SUCCEEDED\|TEST FAILED" ../../xcodebuild.log
       - name: Export results
         if: always()
         run: |
-          xcrun xcresulttool export attachments --path result.xcresult --output-path out || true
+          for a in light dark; do mkdir -p out/$a; xcrun xcresulttool export attachments --path result-$a.xcresult --output-path out/$a || true; done
           tail -c 300000 xcodebuild.log > out/xcodebuild-tail.log || true
           grep -n "error:" xcodebuild.log | head -100 > out/errors.txt || true
           mkdir -p out/crash
