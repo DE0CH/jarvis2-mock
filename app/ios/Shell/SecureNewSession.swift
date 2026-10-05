@@ -89,22 +89,34 @@ struct SecureNewSession: View {
 
   private func toggle(_ n: String) { if picked.contains(n) { picked.remove(n) } else { picked.insert(n) } }
 
+  private func apply(_ p: Core.StoresPayload) {
+    stores = p.stores; image = p.image
+    // pre-selection from normal mode: known, non-sensitive stores only
+    let pre = (options["environments"] as? [String]) ?? []
+    if picked.isEmpty { picked = Set(pre.filter { n in p.stores.contains { $0.name == n && !$0.sensitive } }) }
+  }
+
   private func load() async {
+    if let p = shell.prefetched { apply(p) }
+    if let h = options["harness"] as? String, h == "opencode" { harness = "opencode" }
+    let t = Date()
     do {
       let p = try await Core.shared.stores()
-      stores = p.stores; image = p.image
-      // pre-selection from normal mode: known, non-sensitive stores only
-      let pre = (options["environments"] as? [String]) ?? []
-      picked = Set(pre.filter { n in p.stores.contains { $0.name == n && !$0.sensitive } })
-      if let h = options["harness"] as? String, h == "opencode" { harness = "opencode" }
-    } catch { loadError = error.localizedDescription }
+      shell.log(String(format: "core stores fetched in %.2fs", Date().timeIntervalSince(t)))
+      shell.prefetched = p
+      let keep = picked
+      apply(p)
+      picked = keep.isEmpty ? picked : keep.intersection(p.stores.map(\.name))
+    } catch { if stores.isEmpty { loadError = error.localizedDescription } }
   }
 
   private func create() async {
     failure = nil
     do {
       busy = "Starting…"
+      let t0 = Date()
       let machine = try await Core.shared.start()
+      shell.log(String(format: "core start %.2fs", Date().timeIntervalSince(t0)))
       busy = "Asking…"
       let want = picked.sorted()
       let (doc, c) = try await Core.shared.succession(machine: machine, stores: want, harness: harness)

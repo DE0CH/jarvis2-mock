@@ -41,7 +41,16 @@ final class Shell {
     lines.append(line)
   }
 
+  /// the core's signed store list, fetched at launch so the secure sheet is filled at once (it is
+  /// fetched again, with a fresh nonce, every time the sheet opens)
+  var prefetched: Core.StoresPayload?
+
   func load() async {
+    Task {
+      let t = Date()
+      do { prefetched = try await Core.shared.stores(); log(String(format: "core stores prefetched in %.2fs", Date().timeIntervalSince(t))) }
+      catch { log("core stores prefetch failed: \(error.localizedDescription)") }
+    }
     do {
       let m = try await AppExtensionPoint.Monitor(appExtensionPoint: .jarvisUI)
       monitor = m
@@ -120,7 +129,6 @@ struct RootView: View {
           .padding(.top, 12)
           .ignoresSafeArea(edges: .bottom)
           .transition(.move(edge: .bottom))
-          .accessibilityIdentifier("secure-sheet")
       }
     }
     .task { await shell.load() }
