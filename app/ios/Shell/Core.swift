@@ -125,7 +125,15 @@ final class Core {
 final class PhoneKey {
   static let shared = PhoneKey()
   private let tag = "dev.de0ch.jarvis2.phone-signing"
-  var usesEnclave: Bool { SecureEnclave.isAvailable }
+  // The iOS 26 simulator emulates the Enclave, but its Face ID can't be enrolled/matched from CI, so the
+  // simulator build signs with a software key (the secure sheet says so); a real iPhone uses the Enclave.
+  var usesEnclave: Bool {
+    #if targetEnvironment(simulator)
+    return false
+    #else
+    return SecureEnclave.isAvailable
+    #endif
+  }
 
   private func loadBlob() -> Data? {
     let q: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: tag, kSecAttrAccount as String: usesEnclave ? "se" : "sw", kSecReturnData as String: true]

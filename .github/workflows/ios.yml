@@ -38,11 +38,6 @@ jobs:
           xcrun simctl bootstatus "iPhone 17" -b
           nohup xcrun simctl spawn "iPhone 17" log stream --style compact --level debug \
             --predicate 'process == "JarvisUI" OR process == "Jarvis2"' > out/sim.log 2>&1 &
-      - name: Enrol Face ID on the simulator; keep "matching" during the test (approves every prompt)
-        run: |
-          xcrun simctl spawn "iPhone 17" notifyutil -s com.apple.BiometricKit.enrollmentChanged 1
-          xcrun simctl spawn "iPhone 17" notifyutil -p com.apple.BiometricKit.enrollmentChanged
-          nohup bash -c 'while true; do xcrun simctl spawn "iPhone 17" notifyutil -p com.apple.BiometricKit_Sim.pearl.match >/dev/null 2>&1; sleep 1; done' >/dev/null 2>&1 &
       - name: Build + UI test
         working-directory: app/ios
         run: |
