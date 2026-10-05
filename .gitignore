@@ -1,0 +1,10 @@
+node_modules/
+app/node_modules
+server/node_modules
+app/ios/Pods/
+app/ios/Jarvis2.xcodeproj/
+app/ios/Jarvis2.xcworkspace/
+app/ios/Podfile.lock
+app/ios/Extension/main.jsbundle
+app/ios/Extension/res/
+app/src/lib/xterm-html.gen.ts

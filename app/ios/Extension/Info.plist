@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>EXAppExtensionAttributes</key>
+	<dict>
+		<key>EXExtensionPointIdentifier</key>
+		<string>dev.de0ch.jarvis2.jarvisUI</string>
+	</dict>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Attach photos to a new session.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Attach photos to a new session.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Record video to attach to a new session.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Face ID unlocks the vault key that decrypts secret store values on this iPhone.</string>
+</dict>
+</plist>

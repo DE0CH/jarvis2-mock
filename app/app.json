@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Jarvis 2",
+    "slug": "jarvis2",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "scheme": "jarvis2-app",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "dev.de0ch.jarvis2",
+      "appleTeamId": "S64YL394S3",
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "Attach photos to a new session.",
+        "NSCameraUsageDescription": "Attach photos to a new session.",
+        "NSMicrophoneUsageDescription": "Record video to attach to a new session.",
+        "NSFaceIDUsageDescription": "Face ID unlocks the vault key that decrypts secret store values on this iPhone."
+      }
+    },
+    "web": {
+      "output": "single",
+      "favicon": "./assets/favicon.png",
+      "name": "Jarvis"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Attach photos to a new session."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false,
+      "reactCompiler": true
+    }
+  }
+}

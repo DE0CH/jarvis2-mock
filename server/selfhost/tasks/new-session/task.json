@@ -1,0 +1,24 @@
+{
+  "title": "New session",
+  "description": "Starts a Claude session, the same as the New session page (no attachments). Scheduled daily, it is a session that starts itself with the same prompt every day.",
+  "run": "run.py",
+  "stores": ["default"],
+  "timeoutSeconds": 300,
+  "fields": [
+    { "name": "prompt", "label": "Prompt", "type": "textarea", "placeholder": "Typed into the session as its first message once Claude is up. Required for one-shot.", "help": "Interactive: optional first message. One-shot: the whole job — Claude runs it, then the session is archived and destroyed." },
+    { "name": "title", "label": "Session title", "type": "text", "placeholder": "e.g. daily price digest", "help": "Shows as the session title in the Claude app. Blank: the session names itself." },
+    { "name": "permission_mode", "label": "Permission mode", "type": "select", "default": "bypass", "options": [
+      { "value": "auto", "label": "Auto", "sub": "Auto-approve safe actions; the permission classifier gates the rest." },
+      { "value": "bypass", "label": "Dangerously skip permissions", "sub": "No prompts at all (--dangerously-skip-permissions)." }
+    ] },
+    { "name": "model", "label": "Model", "type": "select", "optionsFrom": "models", "default": "claude-opus-5-5" },
+    { "name": "mode", "label": "Mode", "type": "select", "default": "interactive", "options": [
+      { "value": "interactive", "label": "Interactive", "sub": "Stays up for a conversation in the Claude app until you destroy it." },
+      { "value": "oneshot", "label": "One-shot", "sub": "Runs the prompt, then the session is archived + destroyed automatically." }
+    ] },
+    { "name": "stores", "label": "Secret stores", "type": "multiselect", "optionsFrom": "environments", "default": ["default"], "required": true },
+    { "name": "repos", "label": "Repos", "type": "multiselect", "optionsFrom": "repos", "default": ["claude-env"] },
+    { "name": "size", "label": "Machine size", "type": "select", "optionsFrom": "sizes", "default": "medium" },
+    { "name": "auto_pause", "label": "Auto-pause when idle", "type": "checkbox", "default": true, "help": "Interactive only: stops the machine after ~1h with nothing running; Start wakes it with the conversation kept." }
+  ]
+}
